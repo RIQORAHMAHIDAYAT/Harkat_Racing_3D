@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 91ca21b63bb2d46a383194407c4841cd
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 270101
+  packageName: Honda SUPER CUB C125
+  packageVersion: 1.0
+  assetPath: Assets/Honda Motor Co., Ltd/Scripts/TireRotateScene.cs
+  uploadId: 728669

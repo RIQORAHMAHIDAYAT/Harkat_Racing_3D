@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 132f5c7c40cf242c191d736fd2de944e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 270101
+  packageName: Honda SUPER CUB C125
+  packageVersion: 1.0
+  assetPath: Assets/Honda Motor Co., Ltd/Scripts/WinkerPresenter.cs
+  uploadId: 728669

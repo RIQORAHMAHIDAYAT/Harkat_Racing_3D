@@ -1,0 +1,118 @@
+# ============================================
+# UNITY .GITIGNORE
+# ============================================
+
+.utmp/
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+*.log
+
+# Memory Captures
+/[Mm]emoryCaptures/
+
+# Recordings
+/[Rr]ecordings/
+
+# Asset Store Tools
+# /[Aa]ssets/AssetStoreTools*
+
+# Jetbrains Rider
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# Visual Studio
+.vs/
+
+# Gradle
+.gradle/
+
+# Auto-generated project files
+ExportedObj/
+.consulo/
+
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Crash reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.unitypackage.meta
+*.app
+*.exe
+
+# Crashlytics
+crashlytics-build.properties
+
+# Addressables
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+
+# Android Streaming Assets
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ============================================
+# CUSTOM LARGE FILE IGNORE
+# ============================================
+
+# Photoshop
+*.psd
+
+# TIFF
+*.tif
+*.tiff
+
+# Blender
+*.blend
+
+# Video
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Compressed
+*.zip
+*.rar
+*.7z
+
+# ============================================
+# SPECIFIC LARGE FILES
+# ============================================
+
+Assets/CartoonTracksPack1/Track1/Textures/road.psd
+Assets/CartoonTracksPack1/Track1/Textures/road_normal.png
+
+Assets/Honda Motor Co., Ltd/Super Cub C125/Textures/bump_C.tif
+Assets/Honda Motor Co., Ltd/Super Cub C125/Textures/bump_grip.tif
+Assets/Honda Motor Co., Ltd/Super Cub C125/Textures/normal_C.tif
+Assets/Honda Motor Co., Ltd/Super Cub C125/Textures/normal_grip.tif
+
+Assets/sirkuit2/source/Spielberg.FBX
+
+# Ignore entire huge source folder
+Assets/sirkuit2/source/
