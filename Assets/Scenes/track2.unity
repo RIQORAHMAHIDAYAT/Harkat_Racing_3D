@@ -149,6 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameHUD
   mainMenuSceneName: MainMenu
+  nextTrackSceneName: track1
   totalCoins: 5
 --- !u!4 &79506456
 Transform:
@@ -209,23 +210,23 @@ WheelCollider:
   m_Radius: 0.2
   m_SuspensionSpring:
     spring: 35000
-    damper: 4500
+    damper: 3000
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
+  m_SuspensionDistance: 0.35
   m_ForceAppPointDistance: 0
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_Mass: 5
+  m_WheelDampingRate: 2
   m_ForwardFriction:
-    m_ExtremumSlip: 0.4
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 0.8
-    m_AsymptoteValue: 0.5
+    m_ExtremumSlip: 0.3
+    m_ExtremumValue: 1.2
+    m_AsymptoteSlip: 0.6
+    m_AsymptoteValue: 0.6
     m_Stiffness: 1
   m_SidewaysFriction:
-    m_ExtremumSlip: 0.2
-    m_ExtremumValue: 1
+    m_ExtremumSlip: 0.25
+    m_ExtremumValue: 1.2
     m_AsymptoteSlip: 0.5
-    m_AsymptoteValue: 0.75
+    m_AsymptoteValue: 0.8
     m_Stiffness: 1
   m_IncludeLayers:
     serializedVersion: 2
@@ -280,23 +281,23 @@ WheelCollider:
   m_Radius: 0.2
   m_SuspensionSpring:
     spring: 35000
-    damper: 4500
+    damper: 3000
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
+  m_SuspensionDistance: 0.35
   m_ForceAppPointDistance: 0
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_Mass: 5
+  m_WheelDampingRate: 2
   m_ForwardFriction:
-    m_ExtremumSlip: 0.4
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 0.8
-    m_AsymptoteValue: 0.5
+    m_ExtremumSlip: 0.3
+    m_ExtremumValue: 1.2
+    m_AsymptoteSlip: 0.6
+    m_AsymptoteValue: 0.6
     m_Stiffness: 1
   m_SidewaysFriction:
-    m_ExtremumSlip: 0.2
-    m_ExtremumValue: 1
+    m_ExtremumSlip: 0.25
+    m_ExtremumValue: 1.2
     m_AsymptoteSlip: 0.5
-    m_AsymptoteValue: 0.75
+    m_AsymptoteValue: 0.8
     m_Stiffness: 1
   m_IncludeLayers:
     serializedVersion: 2
@@ -351,23 +352,23 @@ WheelCollider:
   m_Radius: 0.2
   m_SuspensionSpring:
     spring: 35000
-    damper: 4500
+    damper: 3000
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
+  m_SuspensionDistance: 0.35
   m_ForceAppPointDistance: 0
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_Mass: 5
+  m_WheelDampingRate: 2
   m_ForwardFriction:
-    m_ExtremumSlip: 0.4
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 0.8
-    m_AsymptoteValue: 0.5
+    m_ExtremumSlip: 0.3
+    m_ExtremumValue: 1.2
+    m_AsymptoteSlip: 0.6
+    m_AsymptoteValue: 0.6
     m_Stiffness: 1
   m_SidewaysFriction:
-    m_ExtremumSlip: 0.2
-    m_ExtremumValue: 1
+    m_ExtremumSlip: 0.25
+    m_ExtremumValue: 1.2
     m_AsymptoteSlip: 0.5
-    m_AsymptoteValue: 0.75
+    m_AsymptoteValue: 0.8
     m_Stiffness: 1
   m_IncludeLayers:
     serializedVersion: 2
@@ -1220,6 +1221,142 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &989423207
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 989423210}
+  - component: {fileID: 989423209}
+  - component: {fileID: 989423208}
+  m_Layer: 0
+  m_Name: FinishLine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &989423208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 989423207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2caab63be42a22408e111b468e44f2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FinishLine
+  lapsRequired: 1
+  minTimeBetweenCross: 5
+--- !u!65 &989423209
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 989423207}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3, y: 10, z: 80}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &989423210
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 989423207}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 430, y: 39.5, z: 595}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1091065305
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1091065308}
+  - component: {fileID: 1091065307}
+  - component: {fileID: 1091065306}
+  m_Layer: 0
+  m_Name: FinishLine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1091065306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091065305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2caab63be42a22408e111b468e44f2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FinishLine
+  lapsRequired: 1
+  minTimeBetweenCross: 5
+--- !u!65 &1091065307
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091065305}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 40, y: 10, z: 5}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1091065308
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091065305}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 499.8, y: 39.5, z: 597.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1247337739
 GameObject:
   m_ObjectHideFlags: 0
@@ -2534,23 +2671,23 @@ WheelCollider:
   m_Radius: 0.2
   m_SuspensionSpring:
     spring: 35000
-    damper: 4500
+    damper: 3000
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
+  m_SuspensionDistance: 0.35
   m_ForceAppPointDistance: 0
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_Mass: 5
+  m_WheelDampingRate: 2
   m_ForwardFriction:
-    m_ExtremumSlip: 0.4
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 0.8
-    m_AsymptoteValue: 0.5
+    m_ExtremumSlip: 0.3
+    m_ExtremumValue: 1.2
+    m_AsymptoteSlip: 0.6
+    m_AsymptoteValue: 0.6
     m_Stiffness: 1
   m_SidewaysFriction:
-    m_ExtremumSlip: 0.2
-    m_ExtremumValue: 1
+    m_ExtremumSlip: 0.25
+    m_ExtremumValue: 1.2
     m_AsymptoteSlip: 0.5
-    m_AsymptoteValue: 0.75
+    m_AsymptoteValue: 0.8
     m_Stiffness: 1
   m_IncludeLayers:
     serializedVersion: 2
@@ -27442,6 +27579,7 @@ GameObject:
   - component: {fileID: 7950622929675259225}
   - component: {fileID: 7950622929675259227}
   - component: {fileID: 7950622929675259228}
+  - component: {fileID: 7950622929675259229}
   m_Layer: 0
   m_Name: Mobil_bb
   m_TagString: Player
@@ -29254,6 +29392,7 @@ GameObject:
   - component: {fileID: 6217148006824010892}
   - component: {fileID: 7054999563497302825}
   - component: {fileID: 5047571944377556963}
+  - component: {fileID: 7054999563497302826}
   m_Layer: 0
   m_Name: BBW30_UP
   m_TagString: Untagged
@@ -30829,6 +30968,25 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6704856543016631862}
   m_Mesh: {fileID: -6072603258294389618, guid: 0009814b3a8a4c648997a13e32e02051, type: 3}
+--- !u!114 &7054999563497302826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6704856543016631862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adb0a92ef6ce7c14bb3ed6f67540f06e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VehicleRespawn
+  respawnKey: 114
+  safeSpeedThreshold: 5
+  stuckSpeedThreshold: 0.5
+  autoRespawnTime: 6
+  fallThresholdY: -5
+  respawnCooldown: 3
+  respawnHeightOffset: 2
 --- !u!23 &7055201537557057939
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -35546,7 +35704,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!114 &7950622929675259227
@@ -35563,17 +35721,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::mobil
   motorForce: 2000
   brakeForce: 5000
-  maxSteerAngle: 35
+  maxSteerAngle: 38
   centerOfMassOffset: {x: 0, y: -0.6, z: 0}
-  steerResponsiveSpeed: 220
-  steerCenterSpeed: 450
-  minSteerAngleAtHighSpeed: 22
-  speedForMinSteer: 90
-  frontWheelStiffness: 1.3
-  normalSidewaysStiffness: 1.5
-  driftSidewaysStiffness: 0.35
-  stiffnessTransitionSpeed: 8
-  downforce: 80
+  steerResponsiveSpeed: 360
+  steerCenterSpeed: 600
+  minSteerAngleAtHighSpeed: 26
+  speedForMinSteer: 120
+  frontWheelStiffness: 1.6
+  normalSidewaysStiffness: 1.8
+  driftSidewaysStiffness: 0.28
+  stiffnessTransitionSpeed: 4
+  driftTriggerThreshold: 0.75
+  driftSteerMultiplier: 1.3
+  downforce: 150
+  maxDriftAngle: 45
+  driftAngleRecoverySpeed: 3
   frontLeftWheelCollider: {fileID: 97692765}
   frontRightWheelCollider: {fileID: 184729317}
   rearLeftWheelCollider: {fileID: 1959375762}
@@ -35594,6 +35756,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 570531c325d2c5f44b5a9a023e398ac9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MinimapController
+--- !u!114 &7950622929675259229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6301180647757119833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adb0a92ef6ce7c14bb3ed6f67540f06e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VehicleRespawn
+  respawnKey: 114
+  safeSpeedThreshold: 5
+  stuckSpeedThreshold: 0.5
+  autoRespawnTime: 6
+  fallThresholdY: -5
+  respawnCooldown: 3
+  respawnHeightOffset: 2
 --- !u!23 &7951106892248147588
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -44005,3 +44186,5 @@ SceneRoots:
   - {fileID: 1368524810}
   - {fileID: 883026070}
   - {fileID: 79506456}
+  - {fileID: 1091065308}
+  - {fileID: 989423210}

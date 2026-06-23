@@ -30,8 +30,6 @@ public class FinishLine : MonoBehaviour
 
     private void Start()
     {
-        // Set waktu awal agar jika mobil menyentuh garis finis di awal balapan (start),
-        // trigger tersebut diabaikan (karena masih dalam minTimeBetweenCross).
         _lastCrossTime = Time.time;
     }
 
@@ -41,9 +39,13 @@ public class FinishLine : MonoBehaviour
         if (_raceFinished) return;
         if (!other.CompareTag("Player")) return;
 
+        // Hanya proses trigger jika balapan sedang berjalan (State == Racing)
+        if (GameHUD.Instance != null && !GameHUD.Instance.IsRacing) return;
+
         float now = Time.time;
 
-        // Abaikan crossing pertama jika terlalu cepat dari awal (saat start dekat garis)
+        // Abaikan crossing jika terlalu cepat dari crossing sebelumnya
+        // (mencegah false trigger saat start jika player dekat garis finis)
         if (now - _lastCrossTime < minTimeBetweenCross)
         {
             Debug.Log($"[FinishLine] Crossing diabaikan (terlalu cepat: {now - _lastCrossTime:F1}s)");

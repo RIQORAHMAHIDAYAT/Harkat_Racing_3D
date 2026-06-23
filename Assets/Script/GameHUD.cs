@@ -29,12 +29,18 @@ public class GameHUD : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────
     public static GameHUD Instance { get; private set; }
 
+    /// <summary>Flag untuk auto-start balapan saat transisi dari track sebelumnya.</summary>
+    public static bool autoStartNextRace = false;
+
     // ─────────────────────────────────────────────────────────────────
     // INSPECTOR SETTINGS
     // ─────────────────────────────────────────────────────────────────
     [Header("Scene Configuration")]
     [Tooltip("Nama scene Main Menu untuk tombol Back to Home")]
     public string mainMenuSceneName = "MainMenu";
+
+    [Tooltip("Nama scene tujuan tombol Track Selanjutnya (kosongkan jika tidak ada)")]
+    public string nextTrackSceneName = "";
 
     [Tooltip("Total coin yang ada di scene (untuk tampilan X/Y)")]
     public int totalCoins = 5;
@@ -45,10 +51,12 @@ public class GameHUD : MonoBehaviour
     private enum RaceState { WaitingForStart, Countdown, Racing, Paused, Finished }
     private RaceState _state = RaceState.WaitingForStart;
 
+    public bool IsRacing => _state == RaceState.Racing;
+
     // ─────────────────────────────────────────────────────────────────
     // PRIVATE DATA
     // ─────────────────────────────────────────────────────────────────
-    private mobil   _car;
+    private IVehicleController _vehicle;
     private int     _coinsCollected = 0;
     private float   _raceTime       = 0f;
 
@@ -110,33 +118,51 @@ public class GameHUD : MonoBehaviour
         Instance = this;
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     private void Start()
     {
         // Pastikan EventSystem ada — wajib agar tombol UI bisa diklik
         EnsureEventSystem();
 
-        // Cari mobil pemain dan kunci input saat menunggu start
-        _car = FindObjectOfType<mobil>();
-        if (_car != null)
-            _car.SetInputLocked(true);
+        // Cari mobil/motor pemain dan kunci input saat menunggu start
+        mobil c = FindObjectOfType<mobil>();
+        if (c != null)
+        {
+            _vehicle = c;
+        }
+        else
+        {
+            BikeController b = FindObjectOfType<BikeController>();
+            if (b != null)
+            {
+                _vehicle = b;
+            }
+        }
 
-        // Cek apakah ada FinishLine di scene, jika tidak ada, buat otomatis
+        if (_vehicle != null)
+            _vehicle.SetInputLocked(true);
+
+        // Jika tidak ada FinishLine di scene, buat otomatis di posisi pemain
         if (FindObjectOfType<FinishLine>() == null)
         {
-            Debug.Log("[GameHUD] FinishLine tidak ditemukan! Membuat otomatis di posisi mobil...");
-            if (_car != null)
+            Debug.LogWarning("[GameHUD] FinishLine tidak ditemukan di scene! Membuat otomatis...");
+            if (_vehicle != null)
             {
                 GameObject finishObj = new GameObject("FinishLine_Auto");
-                // Posisikan tepat di mobil. Karena di FinishLine.cs kita sudah set 
-                // crossing pertama di awal balapan diabaikan (minTimeBetweenCross = 5s), 
-                // ini akan menjadi garis finish yang sempurna setelah 1 putaran.
-                finishObj.transform.position = _car.transform.position;
-                finishObj.transform.rotation = _car.transform.rotation;
+                MonoBehaviour vehicleBehaviour = _vehicle as MonoBehaviour;
+                if (vehicleBehaviour != null)
+                {
+                    finishObj.transform.position = vehicleBehaviour.transform.position;
+                    finishObj.transform.rotation = vehicleBehaviour.transform.rotation;
+                }
                 
                 BoxCollider col = finishObj.AddComponent<BoxCollider>();
                 col.isTrigger = true;
-                // Buat sangat lebar dan tinggi agar tidak terlewat
-                col.size = new Vector3(80f, 20f, 5f); 
+                col.size = new Vector3(40f, 10f, 5f);
                 
                 finishObj.AddComponent<FinishLine>();
             }
@@ -149,6 +175,13 @@ public class GameHUD : MonoBehaviour
         // Inisialisasi tampilan awal
         RefreshCoin();
         RefreshTimer();
+
+        // Auto-start jika berasal dari transisi track sebelumnya
+        if (autoStartNextRace)
+        {
+            autoStartNextRace = false;
+            StartCountdown();
+        }
     }
 
     private void Update()
@@ -198,7 +231,7 @@ public class GameHUD : MonoBehaviour
     {
         if (_state != RaceState.Racing) return;
         _state = RaceState.Finished;
-        if (_car != null) _car.SetInputLocked(true);
+        if (_vehicle != null) _vehicle.SetInputLocked(true);
 
         // Isi teks waktu final di finish panel
         if (_finishTimeText != null)
@@ -274,7 +307,7 @@ public class GameHUD : MonoBehaviour
         _countdownOverlay.SetActive(false);
 
         // Mulai balapan!
-        if (_car != null) _car.SetInputLocked(false);
+        if (_vehicle != null) _vehicle.SetInputLocked(false);
         _state = RaceState.Racing;
     }
 
@@ -300,7 +333,7 @@ public class GameHUD : MonoBehaviour
         {
             remaining -= Time.deltaTime;
             if (_boostTimerText != null)
-                _boostTimerText.text = $"⚡  SPEED BOOST  {Mathf.CeilToInt(remaining)}s  ⚡";
+                _boostTimerText.text = $"SPEED BOOST  {Mathf.CeilToInt(remaining)}s";
             yield return null;
         }
 
@@ -327,7 +360,7 @@ public class GameHUD : MonoBehaviour
     {
         _state = RaceState.Paused;
         Time.timeScale = 0f;
-        if (_car != null) _car.SetInputLocked(true);
+        if (_vehicle != null) _vehicle.SetInputLocked(true);
 
         _pausePanel.SetActive(true);
         if (_pauseBtn != null) _pauseBtn.gameObject.SetActive(false);
@@ -337,7 +370,7 @@ public class GameHUD : MonoBehaviour
     {
         _state = RaceState.Racing;
         Time.timeScale = 1f;
-        if (_car != null) _car.SetInputLocked(false);
+        if (_vehicle != null) _vehicle.SetInputLocked(false);
 
         _pausePanel.SetActive(false);
         if (_pauseBtn != null) _pauseBtn.gameObject.SetActive(true);
@@ -347,6 +380,13 @@ public class GameHUD : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(mainMenuSceneName);
+    }
+
+    private void GoToNextTrack()
+    {
+        autoStartNextRace = true;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(nextTrackSceneName);
     }
 
     // ─── Settings toggle di pause panel ─────────────────────────────
@@ -436,10 +476,16 @@ public class GameHUD : MonoBehaviour
     // ── Top Bar ──────────────────────────────────────────────────────
     private void BuildTopBar()
     {
+        // Jika totalCoins > 0, gunakan ukuran default untuk menampung Coin + Timer.
+        // Jika totalCoins == 0 (time trial), perkecil panel dan tengahkan timer.
+        bool showCoins = (totalCoins > 0);
+        float barWidth = showCoins ? 290f : 180f;
+        float barHeight = showCoins ? 74f : 44f;
+
         GameObject bar = MakePanel("HUD_TopBar", _canvas.transform,
             pivot: V2(0.5f, 1f),
             anMin: V2(0.5f, 1f), anMax: V2(0.5f, 1f),
-            size:  V2(290f, 74f), pos: V2(0f, -10f));
+            size:  V2(barWidth, barHeight), pos: V2(0f, -10f));
         SetImg(bar, ColDarkBg);
 
         // Garis aksen bawah panel (cyan tipis)
@@ -451,15 +497,27 @@ public class GameHUD : MonoBehaviour
         accent.GetComponent<RectTransform>().offsetMax = V2(0, 2);
         SetImg(accent, ColCyan);
 
-        // ─ Coin text (atas) ──────────────────────────────
-        _coinText = MakeTMP("HUD_Coin", bar.transform, $"COIN  0 / {totalCoins}", 22f, ColGold, TextAlignmentOptions.Center);
-        Stretch(_coinText.rectTransform, V2(10f, 2f), V2(-10f, 0f), V2(0f, 0.5f), V2(1f, 1f));
-        _coinText.fontStyle = FontStyles.Bold;
+        if (showCoins)
+        {
+            // ─ Coin text (atas) ──────────────────────────────
+            _coinText = MakeTMP("HUD_Coin", bar.transform, $"COIN  0 / {totalCoins}", 22f, ColGold, TextAlignmentOptions.Center);
+            Stretch(_coinText.rectTransform, V2(10f, 2f), V2(-10f, 0f), V2(0f, 0.5f), V2(1f, 1f));
+            _coinText.fontStyle = FontStyles.Bold;
 
-        // ─ Timer text (bawah) ────────────────────────────
-        _timerText = MakeTMP("HUD_Timer", bar.transform, "00:00<size=65%>.00</size>", 30f, Color.white, TextAlignmentOptions.Center);
-        Stretch(_timerText.rectTransform, V2(10f, 0f), V2(-10f, -2f), V2(0f, 0f), V2(1f, 0.52f));
-        _timerText.fontStyle = FontStyles.Bold;
+            // ─ Timer text (bawah) ────────────────────────────
+            _timerText = MakeTMP("HUD_Timer", bar.transform, "00:00<size=65%>.00</size>", 30f, Color.white, TextAlignmentOptions.Center);
+            Stretch(_timerText.rectTransform, V2(10f, 0f), V2(-10f, -2f), V2(0f, 0f), V2(1f, 0.52f));
+            _timerText.fontStyle = FontStyles.Bold;
+        }
+        else
+        {
+            _coinText = null;
+
+            // ─ Timer text (tengah) ────────────────────────────
+            _timerText = MakeTMP("HUD_Timer", bar.transform, "00:00<size=65%>.00</size>", 30f, Color.white, TextAlignmentOptions.Center);
+            Stretch(_timerText.rectTransform, V2(10f, 2f), V2(-10f, -2f), V2(0f, 0f), V2(1f, 1f));
+            _timerText.fontStyle = FontStyles.Bold;
+        }
     }
 
     // ── "Tekan W" Hint ───────────────────────────────────────────────
@@ -549,7 +607,7 @@ public class GameHUD : MonoBehaviour
         _boostCG.alpha = 0f;
 
         _boostTimerText = MakeTMP("BoostLbl", go.transform,
-            "⚡  SPEED BOOST  3s  ⚡", 21f, Color.white, TextAlignmentOptions.Center);
+            "SPEED BOOST  3s", 21f, Color.white, TextAlignmentOptions.Center);
         Stretch(_boostTimerText.rectTransform, V2(6f, 0f), V2(-6f, 0f), V2(0,0), V2(1f,1f));
         _boostTimerText.fontStyle = FontStyles.Bold;
 
@@ -608,7 +666,7 @@ public class GameHUD : MonoBehaviour
         GameObject card = MakePanel("PauseCard", _pausePanel.transform,
             pivot: V2(0.5f, 0.5f),
             anMin: V2(0.5f, 0.5f), anMax: V2(0.5f, 0.5f),
-            size:  V2(440f, 400f), pos: V2(0f, 0f));
+            size:  V2(440f, 440f), pos: V2(0f, 0f));
         SetImg(card, new Color(0.07f, 0.07f, 0.12f, 0.93f));
 
         // ── Header "— PAUSED —" (tipis, tidak dominan) ───────────────
@@ -638,7 +696,7 @@ public class GameHUD : MonoBehaviour
 
         // ── Resume Button (hijau) ─────────────────────────────────────
         rowY -= 78f;
-        BuildActionBtn(card.transform, "▶   Resume", ColGreen, rowY, ResumeGame);
+        BuildActionBtn(card.transform, "Resume", ColGreen, rowY, ResumeGame);
 
         // ── Back to Home Button (merah — seperti tombol Close) ───────
         rowY -= 62f;
@@ -660,11 +718,17 @@ public class GameHUD : MonoBehaviour
         fRt.offsetMax = V2(0f, 0f);
         SetImg(_finishPanel, new Color(0f, 0f, 0.05f, 0.80f));
 
+        bool showCoins = (totalCoins > 0);
+        bool hasNextTrack = !string.IsNullOrEmpty(nextTrackSceneName);
+        float cardHeight = showCoins
+            ? (hasNextTrack ? 460f : 400f)
+            : (hasNextTrack ? 360f : 300f);
+
         // Card tengah
         GameObject card = MakePanel("FinishCard", _finishPanel.transform,
             pivot: V2(0.5f, 0.5f),
             anMin: V2(0.5f, 0.5f), anMax: V2(0.5f, 0.5f),
-            size:  V2(460f, 400f), pos: V2(0f, 0f));
+            size:  V2(460f, cardHeight), pos: V2(0f, 0f));
         SetImg(card, new Color(0.06f, 0.07f, 0.15f, 0.97f));
 
         // ── Judul FINISH ──────────────────────────────────────────────
@@ -688,29 +752,51 @@ public class GameHUD : MonoBehaviour
         finalTime.fontStyle = FontStyles.Bold;
         _finishTimeText = finalTime;
 
-        // ── Teks "Coin Didapat" ─────────────────────────────────────────
-        var lblCoin = MakeTMP("FinishLabelCoin", card.transform, "Coin Emas Didapat", 20f,
-            new Color(0.7f, 0.78f, 0.9f, 1f), TextAlignmentOptions.Center);
-        RectRect(lblCoin.rectTransform, V2(0.5f, 1f), V2(0.5f, 1f), V2(0.5f, 1f),
-            V2(380f, 32f), V2(0f, -205f));
+        float dividerY = -315f;
+        float buttonY = -332f;
 
-        // ── Coin final (diisi saat finish dipanggil) ─────────────────
-        var finalCoin = MakeTMP("FinishCoin", card.transform, "0 / 5", 44f,
-            ColGold, TextAlignmentOptions.Center);
-        RectRect(finalCoin.rectTransform, V2(0.5f, 1f), V2(0.5f, 1f), V2(0.5f, 1f),
-            V2(380f, 56f), V2(0f, -245f));
-        finalCoin.fontStyle = FontStyles.Bold;
-        _finishCoinText = finalCoin;
+        if (showCoins)
+        {
+            // ── Teks "Coin Didapat" ─────────────────────────────────────────
+            var lblCoin = MakeTMP("FinishLabelCoin", card.transform, "Coin Emas Didapat", 20f,
+                new Color(0.7f, 0.78f, 0.9f, 1f), TextAlignmentOptions.Center);
+            RectRect(lblCoin.rectTransform, V2(0.5f, 1f), V2(0.5f, 1f), V2(0.5f, 1f),
+                V2(380f, 32f), V2(0f, -205f));
+
+            // ── Coin final (diisi saat finish dipanggil) ─────────────────
+            var finalCoin = MakeTMP("FinishCoin", card.transform, "0 / 5", 44f,
+                ColGold, TextAlignmentOptions.Center);
+            RectRect(finalCoin.rectTransform, V2(0.5f, 1f), V2(0.5f, 1f), V2(0.5f, 1f),
+                V2(380f, 56f), V2(0f, -245f));
+            finalCoin.fontStyle = FontStyles.Bold;
+            _finishCoinText = finalCoin;
+        }
+        else
+        {
+            dividerY = -215f;
+            buttonY = -232f;
+            _finishCoinText = null;
+        }
 
         // ── Divider ───────────────────────────────────────────────────
         var div = MakePanel("FinishDiv", card.transform,
             pivot: V2(0.5f, 1f),
             anMin: V2(0.5f, 1f), anMax: V2(0.5f, 1f),
-            size:  V2(380f, 1f), pos: V2(0f, -315f));
+            size:  V2(380f, 1f), pos: V2(0f, dividerY));
         SetImg(div, ColDivider);
 
-        // ── Back to Main Menu (merah) ─────────────────────────────────
-        BuildActionBtn(card.transform, "Back to Home", ColRed, -332f, GoToMainMenu);
+        if (hasNextTrack)
+        {
+            // ── Track Selanjutnya (biru) ──────────────────────────────
+            BuildActionBtn(card.transform, "Track Selanjutnya", ColBlue, buttonY, GoToNextTrack);
+            // ── Back to Main Menu (merah) ─────────────────────────────
+            BuildActionBtn(card.transform, "Back to Home", ColRed, buttonY - 62f, GoToMainMenu);
+        }
+        else
+        {
+            // ── Back to Main Menu (merah) ─────────────────────────────
+            BuildActionBtn(card.transform, "Back to Home", ColRed, buttonY, GoToMainMenu);
+        }
 
         _finishPanel.SetActive(false);
     }

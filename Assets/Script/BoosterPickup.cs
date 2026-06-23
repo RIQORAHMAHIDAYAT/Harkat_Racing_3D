@@ -61,14 +61,14 @@ public class BoosterPickup : MonoBehaviour
 
         _collected = true;
 
-        // Cari script mobil — cek di collider atau parent-nya
-        mobil car = other.GetComponent<mobil>();
-        if (car == null) car = other.GetComponentInParent<mobil>();
-        if (car == null) car = other.GetComponentInChildren<mobil>();
+        // Cari script kendaraan — cek di collider atau parent/children-nya
+        IVehicleController vehicle = other.GetComponent<IVehicleController>();
+        if (vehicle == null) vehicle = other.GetComponentInParent<IVehicleController>();
+        if (vehicle == null) vehicle = other.GetComponentInChildren<IVehicleController>();
 
         // Aktifkan boost kecepatan
-        if (car != null)
-            car.ActivateBoost(boostDuration);
+        if (vehicle != null)
+            vehicle.ActivateBoost(boostDuration);
 
         // Tampilkan indikator boost di HUD
         if (GameHUD.Instance != null)

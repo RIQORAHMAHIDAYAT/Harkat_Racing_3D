@@ -61,21 +61,13 @@ public static class HarkatRacingSetup
     // SETUP FUNCTIONS
     // ════════════════════════════════════════════════════════════════════
 
-    // ── Setup Mobil → Tag "Player" ───────────────────────────────────────
+    // ── Setup Mobil/Motor → Tag "Player" ───────────────────────────────────────
     private static int SetupCar(ref int warn)
     {
+        int count = 0;
+
         // Cari berdasarkan komponen mobil.cs
         mobil[] cars = Object.FindObjectsByType<mobil>(FindObjectsSortMode.None);
-
-        if (cars.Length == 0)
-        {
-            Debug.LogWarning("⚠️  Tidak menemukan GameObject dengan script 'mobil.cs'. " +
-                             "Tambahkan script mobil.cs ke mobil pemain dulu.");
-            warn++;
-            return 0;
-        }
-
-        int count = 0;
         foreach (var car in cars)
         {
             if (car.tag != "Player")
@@ -84,20 +76,70 @@ public static class HarkatRacingSetup
                 car.gameObject.tag = "Player";
                 EditorUtility.SetDirty(car.gameObject);
                 Debug.Log($"✅  Mobil '{car.gameObject.name}' → Tag diset ke 'Player'");
-                count++;
             }
             else
             {
                 Debug.Log($"ℹ️   Mobil '{car.gameObject.name}' sudah bertag 'Player'");
-                count++;
             }
+            count++;
 
-            // Pastikan ada Rigidbody (diperlukan oleh WheelCollider)
+            // Pastikan ada Rigidbody
             if (car.GetComponent<Rigidbody>() == null)
             {
                 Debug.LogWarning($"⚠️  Mobil '{car.gameObject.name}' tidak punya Rigidbody! Tambahkan secara manual.");
                 warn++;
             }
+
+            // Pastikan ada MinimapController untuk minimap Top-Down
+            if (car.GetComponent<MinimapController>() == null)
+            {
+                Undo.RecordObject(car.gameObject, "Add MinimapController");
+                Undo.AddComponent<MinimapController>(car.gameObject);
+                EditorUtility.SetDirty(car.gameObject);
+                Debug.Log($"✅  Mobil '{car.gameObject.name}' → MinimapController ditambahkan");
+            }
+        }
+
+        // Cari berdasarkan komponen BikeController.cs
+        BikeController[] bikes = Object.FindObjectsByType<BikeController>(FindObjectsSortMode.None);
+        foreach (var bike in bikes)
+        {
+            if (bike.tag != "Player")
+            {
+                Undo.RecordObject(bike.gameObject, "Set Tag Player");
+                bike.gameObject.tag = "Player";
+                EditorUtility.SetDirty(bike.gameObject);
+                Debug.Log($"✅  Motor '{bike.gameObject.name}' → Tag diset ke 'Player'");
+            }
+            else
+            {
+                Debug.Log($"ℹ️   Motor '{bike.gameObject.name}' sudah bertag 'Player'");
+            }
+            count++;
+
+            // Pastikan ada Rigidbody
+            if (bike.GetComponent<Rigidbody>() == null)
+            {
+                Debug.LogWarning($"⚠️  Motor '{bike.gameObject.name}' tidak punya Rigidbody! Tambahkan secara manual.");
+                warn++;
+            }
+
+            // Pastikan ada MinimapController untuk minimap Top-Down
+            if (bike.GetComponent<MinimapController>() == null)
+            {
+                Undo.RecordObject(bike.gameObject, "Add MinimapController");
+                Undo.AddComponent<MinimapController>(bike.gameObject);
+                EditorUtility.SetDirty(bike.gameObject);
+                Debug.Log($"✅  Motor '{bike.gameObject.name}' → MinimapController ditambahkan");
+            }
+        }
+
+        if (count == 0)
+        {
+            Debug.LogWarning("⚠️  Tidak menemukan GameObject dengan script 'mobil.cs' atau 'BikeController.cs'. " +
+                             "Tambahkan salah satu script tersebut ke kendaraan pemain dulu.");
+            warn++;
+            return 0;
         }
 
         return count;
@@ -267,7 +309,7 @@ public static class HarkatRacingSetup
         int count = 0;
         foreach (var go in GetAllSceneObjects())
             if (IsCoin(go.name)) count++;
-        return Mathf.Max(count, 1); // minimal 1
+        return count;
     }
 
     // Cek apakah nama GameObject mengandung keyword coin
