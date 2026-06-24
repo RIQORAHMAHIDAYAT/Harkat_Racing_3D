@@ -29,8 +29,10 @@ public class GameHUD : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────
     public static GameHUD Instance { get; private set; }
 
-    /// <summary>Flag untuk auto-start balapan saat transisi dari track sebelumnya.</summary>
-    public static bool autoStartNextRace = false;
+
+    private bool _countdownActive = false;
+    private int _countdownIndex = 0;
+    private float _countdownStepStart = 0f;
 
     // ─────────────────────────────────────────────────────────────────
     // INSPECTOR SETTINGS
@@ -44,6 +46,8 @@ public class GameHUD : MonoBehaviour
 
     [Tooltip("Total coin yang ada di scene (untuk tampilan X/Y)")]
     public int totalCoins = 5;
+
+
 
     // ─────────────────────────────────────────────────────────────────
     // RACE STATE
@@ -110,11 +114,10 @@ public class GameHUD : MonoBehaviour
     // ═════════════════════════════════════════════════════════════════
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        // GameHUD bukan objek persisten lintas scene (tidak pakai DontDestroyOnLoad).
+        // Saat berpindah track, Instance lama belum di-destroy saat Awake() baru berjalan,
+        // sehingga cek lama akan menghancurkan GameHUD baru secara salah → countdown macet.
+        // Solusi: langsung timpa Instance dengan objek aktif di scene saat ini.
         Instance = this;
     }
 
@@ -142,6 +145,8 @@ public class GameHUD : MonoBehaviour
                 _vehicle = b;
             }
         }
+
+        Debug.Log($"[GameHUD] Vehicle ditemukan: {( _vehicle != null ? _vehicle.GetType().Name : "NULL" )}");
 
         if (_vehicle != null)
             _vehicle.SetInputLocked(true);
@@ -172,20 +177,19 @@ public class GameHUD : MonoBehaviour
         _canvas = CreateCanvas();
         BuildHUD();
 
+
+
         // Inisialisasi tampilan awal
         RefreshCoin();
         RefreshTimer();
 
-        // Auto-start jika berasal dari transisi track sebelumnya
-        if (autoStartNextRace)
-        {
-            autoStartNextRace = false;
-            StartCountdown();
-        }
+
     }
 
     private void Update()
     {
+
+
         switch (_state)
         {
             // ─ Menunggu pemain tekan W ─────────────────────
@@ -197,6 +201,11 @@ public class GameHUD : MonoBehaviour
                 {
                     StartCountdown();
                 }
+                break;
+
+            // ─ Countdown berjalan (Update-based) ──────────
+            case RaceState.Countdown:
+                TickCountdown();
                 break;
 
             // ─ Balapan berjalan: update timer ─────────────
@@ -248,67 +257,81 @@ public class GameHUD : MonoBehaviour
     }
 
     // ═════════════════════════════════════════════════════════════════
-    // COUNTDOWN
+    // COUNTDOWN — Update-based (tidak pakai coroutine agar tidak
+    // bergantung pada game loop untuk yield)
     // ═════════════════════════════════════════════════════════════════
+    private static readonly string[] CountdownLabels =
+        { "3", "2", "1", "GO!" };
+
+    private static readonly Color[] CountdownColors =
+    {
+        new Color(1.0f, 0.30f, 0.12f, 1f),
+        new Color(1.0f, 0.82f, 0.04f, 1f),
+        new Color(0.2f, 0.88f, 0.28f, 1f),
+        new Color(0.15f, 0.88f, 1.0f, 1f),
+    };
+
+    private static readonly float[] CountdownDurations = { 0.62f, 0.62f, 0.62f, 0.75f };
+
     private void StartCountdown()
     {
         _state = RaceState.Countdown;
+        _countdownActive = true;
+        _countdownIndex = 0;
+        _countdownStepStart = Time.realtimeSinceStartup;
         if (_pressWHint != null) _pressWHint.SetActive(false);
-        StartCoroutine(CountdownRoutine());
-    }
-
-    private IEnumerator CountdownRoutine()
-    {
         _countdownOverlay.SetActive(true);
 
-        // Data tiap step countdown
-        string[] labels = { "3",     "2",     "1",     "GO!" };
-        Color[]  colors =
+        ApplyCountdownStep(0);
+        Debug.Log("[GameHUD] Countdown dimulai — Update-based");
+    }
+
+    private void ApplyCountdownStep(int i)
+    {
+        _countdownNumber.text  = CountdownLabels[i];
+        _countdownNumber.color = CountdownColors[i];
+        _countdownNumber.transform.localScale = Vector3.one * 1.2f;
+    }
+
+    private void TickCountdown()
+    {
+        if (!_countdownActive)
         {
-            new Color(1.0f, 0.30f, 0.12f, 1f), // Merah — 3
-            new Color(1.0f, 0.82f, 0.04f, 1f), // Kuning — 2
-            new Color(0.2f, 0.88f, 0.28f, 1f), // Hijau — 1
-            new Color(0.15f, 0.88f, 1.0f, 1f), // Cyan — GO!
-        };
-        float[] holdSec = { 0.62f, 0.62f, 0.62f, 0.75f };
-
-        for (int i = 0; i < labels.Length; i++)
-        {
-            _countdownNumber.text  = labels[i];
-            _countdownNumber.color = colors[i];
-            _countdownNumber.transform.localScale = Vector3.one * 0.35f;
-
-            // ── Scale-in ─────────────────────────────────────
-            float dur  = 0.20f;
-            float peak = (i == labels.Length - 1) ? 1.10f : 1.20f;
-            for (float t = 0f; t < dur; t += Time.deltaTime)
-            {
-                float s = Mathf.SmoothStep(0.35f, peak, t / dur);
-                _countdownNumber.transform.localScale = Vector3.one * s;
-                yield return null;
-            }
-            _countdownNumber.transform.localScale = Vector3.one * peak;
-
-            // ── Hold ─────────────────────────────────────────
-            float wait = holdSec[i] - dur;
-            if (wait > 0f) yield return new WaitForSeconds(wait);
-
-            // ── Fade-out ─────────────────────────────────────
-            float fadeDur = 0.15f;
-            Color startCol = colors[i];
-            for (float t = 0f; t < fadeDur; t += Time.deltaTime)
-            {
-                float a = Mathf.Lerp(1f, 0f, t / fadeDur);
-                _countdownNumber.color = new Color(startCol.r, startCol.g, startCol.b, a);
-                yield return null;
-            }
+            Debug.LogWarning("[GameHUD] TickCountdown dipanggil tapi _countdownActive=false");
+            return;
         }
 
-        _countdownOverlay.SetActive(false);
+        float elapsed = Time.realtimeSinceStartup - _countdownStepStart;
+        Debug.Log($"[GameHUD] TickCountdown — index={_countdownIndex}/{CountdownLabels.Length-1}, elapsed={elapsed:F2}s, need={CountdownDurations[_countdownIndex]}s");
+        if (elapsed < CountdownDurations[_countdownIndex]) return;
 
-        // Mulai balapan!
-        if (_vehicle != null) _vehicle.SetInputLocked(false);
-        _state = RaceState.Racing;
+        // Step selesai — maju ke step berikutnya
+        _countdownIndex++;
+        Debug.Log($"[GameHUD] Step selesai → maju ke index {_countdownIndex}");
+
+        if (_countdownIndex >= CountdownLabels.Length)
+        {
+            // Semua step selesai → mulai balapan!
+            _countdownActive = false;
+            _countdownOverlay.SetActive(false);
+            Debug.Log("[GameHUD] Countdown selesai — Update-based");
+            Debug.Log($"[GameHUD] Akan unlock vehicle: _vehicle={( _vehicle != null ? _vehicle.GetType().Name : "NULL" )}");
+            if (_vehicle != null)
+            {
+                _vehicle.SetInputLocked(false);
+                Debug.Log("[GameHUD] SetInputLocked(false) DIPANGGIL");
+            }
+            else
+            {
+                Debug.LogError("[GameHUD] _vehicle NULL — input TIDAK di-unlock!");
+            }
+            _state = RaceState.Racing;
+            Debug.Log("[GameHUD] _state = Racing — balapan dimulai!");
+            return;
+        }
+
+        _countdownStepStart = Time.realtimeSinceStartup;
+        ApplyCountdownStep(_countdownIndex);
     }
 
     // ═════════════════════════════════════════════════════════════════
@@ -376,15 +399,23 @@ public class GameHUD : MonoBehaviour
         if (_pauseBtn != null) _pauseBtn.gameObject.SetActive(true);
     }
 
-    private void GoToMainMenu()
+    /// <summary>
+    /// Kembali ke Main Menu. Bisa dipanggil dari Inspector OnClick Button.
+    /// </summary>
+    public void GoToMainMenu()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(mainMenuSceneName);
     }
 
-    private void GoToNextTrack()
+    /// <summary>
+    /// Pindah ke scene Track Selanjutnya (nextTrackSceneName).
+    /// Aktifkan autoStartNextRace agar balapan langsung mulai.
+    /// Bisa dipanggil dari Inspector OnClick Button.
+    /// </summary>
+    public void GoToNextTrack()
     {
-        autoStartNextRace = true;
+        Debug.Log($"[GameHUD] GoToNextTrack → loading \"{nextTrackSceneName}\"");
         Time.timeScale = 1f;
         SceneManager.LoadScene(nextTrackSceneName);
     }
@@ -470,7 +501,8 @@ public class GameHUD : MonoBehaviour
         BuildBoostIndicator();  // Indikator boost tengah layar
         BuildCountdownOverlay();// Overlay countdown — bangun setelah lainnya agar di layer atas
         BuildPausePanel();      // Pause panel — paling atas
-        BuildFinishPanel();     // Layar finish — paling atas
+
+        BuildFinishPanel();  // Layar finish — paling atas
     }
 
     // ── Top Bar ──────────────────────────────────────────────────────

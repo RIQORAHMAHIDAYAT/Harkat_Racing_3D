@@ -301,6 +301,7 @@ public class mobil : MonoBehaviour, IVehicleController
 
     public void SetInputLocked(bool locked)
     {
+        Debug.Log($"[mobil] SetInputLocked({locked}) — pos={transform.position}");
         _inputLocked = locked;
         if (locked)
         {

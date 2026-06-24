@@ -151,6 +151,9 @@ MonoBehaviour:
   mainMenuSceneName: MainMenu
   nextTrackSceneName: track1
   totalCoins: 5
+  finishPanelRef: {fileID: 1145921877}
+  finishTimeTextRef: {fileID: 2042149830}
+  finishCoinTextRef: {fileID: 314655183}
 --- !u!4 &79506456
 Transform:
   m_ObjectHideFlags: 0
@@ -1283,7 +1286,7 @@ Transform:
   m_GameObject: {fileID: 989423207}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 430, y: 39.5, z: 595}
+  m_LocalPosition: {x: 495.4, y: 39.5, z: 595}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

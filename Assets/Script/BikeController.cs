@@ -270,9 +270,17 @@ public class BikeController : MonoBehaviour, IVehicleController
             respawnCooldown -= Time.deltaTime;
     }
 
+    private int _fixedStep = 0;
+
     private void FixedUpdate()
     {
         isGrounded = CheckGrounded();
+        _fixedStep++;
+
+        if (_fixedStep <= 5 || _fixedStep % 60 == 0)
+        {
+            Debug.Log($"[BikeController] FixedUpdate #{_fixedStep}: rb={(rb != null ? "OK" : "NULL")}, _inputLocked={_inputLocked}, isGrounded={isGrounded}, speed={(rb != null ? rb.linearVelocity.magnitude.ToString("F1") : "N/A")}");
+        }
 
         if (_inputLocked)
         {
@@ -448,6 +456,7 @@ public class BikeController : MonoBehaviour, IVehicleController
 
     public void SetInputLocked(bool locked)
     {
+        Debug.Log($"[BikeController] SetInputLocked({locked}) — rb={(rb != null ? "OK" : "NULL")}, isGrounded={isGrounded}, pos={transform.position}");
         _inputLocked = locked;
         if (locked && rb != null)
         {
